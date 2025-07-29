@@ -40,7 +40,7 @@
       <!-- Right Chat Section -->
       <div class="w-2/3 flex flex-col bg-black/10">
         <div class="p-6 border-b border-white/10">
-          <h2 class="text-2xl font-bold text-white">Chat Area</h2>
+          <h2 class="text-2xl font-bold text-white" id="chatTitle">Chat Area</h2>
         </div>
 
         <!-- Chat Messages Area -->
@@ -88,7 +88,15 @@
 
       async function updateReceiver(selectedId) {
         receiverId = selectedId;
-        console.log("Receiver Selected Id ---- >", receiverId);
+        
+        // Find the selected user's display name
+        const selectedUser = users.find(user => user._id === selectedId);
+        
+        // Update the page title and chat header
+        if (selectedUser) {
+            document.title = `Chat with ${selectedUser.displayName}`;
+            document.getElementById('chatTitle').textContent = `Chat with ${selectedUser.displayName}`;
+        }
         
         try {
             // Fetch chats between current user and selected user
