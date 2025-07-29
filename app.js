@@ -203,7 +203,7 @@ app.get('/getChat/:id', isLoggedIn,async (req,res) => {
     const senderId = req.user._id;
     const sen = await userModel.findById(senderId);
     //console.log("reciever --- > "+ rec);
-    console.log("current user -- >" + req.user);
+    // console.log("current user -- >" + req.user);
     const allChats = await chatModel.find({
         $or: [
         {senderId:senderId,receiverId:receiverId}, 
