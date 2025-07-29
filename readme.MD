@@ -4,33 +4,33 @@ Welcome to **Chattrix** — a modern, real-time chat platform where users can cr
 
 ---
 
-## 🚀 Tech Stack
+##  Tech Stack
 
-- 🌐 Node.js + Express.js
-- 💾 MongoDB (with Mongoose)
-- 🧠 JWT Authentication
-- 🔐 Google OAuth (via Passport.js)
-- 📡 Socket.IO for real-time messaging
-- 💅 Tailwind CSS for UI styling
-- 📄 EJS for templating
-
----
-
-## ✨ Features
-
-- ✅ Sign up / Log in using Email or Google
-- 🔐 JWT-based secure sessions
-- 💬 Real-time messaging with Socket.IO
-- 🌈 Tailwind-powered modern responsive UI
-- 🔒 Google OAuth login support
-- 🛠️ Environment variable support using `.env`
+-  Node.js + Express.js
+-  MongoDB (with Mongoose)
+-  JWT Authentication
+-  Google OAuth (via Passport.js)
+-  Socket.IO for real-time messaging
+-  Tailwind CSS for UI styling
+-  EJS for templating
 
 ---
 
-## 📁 Folder Structure
+##  Features
+
+-  Sign up / Log in using Email or Google
+-  JWT-based secure sessions
+-  Real-time messaging with Socket.IO
+-  Tailwind-powered modern responsive UI
+-  Google OAuth login support
+-  Environment variable support using `.env`
+
+---
+
+## Folder Structure
 
 <pre>
-📦 Chattrix/
+Chattrix/
 ├── public/               # Static assets (JS, CSS)
 ├── views/                # EJS templates
 ├── routes/               # Express route handlers
@@ -61,7 +61,7 @@ npm start
 
 
 
-## 📁 .env sample
+## .env sample
 PORT=5000
 MONGODB_URI=your-mongodb-connection-string
 JWT_SECRET=your-jwt-secret-key
@@ -69,7 +69,7 @@ GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 
 
-## 📁 Google OAuth
+## Google OAuth
 To enable Google Login:
 
 Go to Google Cloud Console
@@ -83,5 +83,5 @@ Go to Google Cloud Console
 7.Paste them into your .env file:
 
 
-## 🧑‍💻 Author
+## 🧑Author
 Made with ❤️ by Rohit Gupta
