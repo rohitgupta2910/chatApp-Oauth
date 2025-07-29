@@ -6,13 +6,54 @@ const cookie = require('cookie-parser')
 const bcrypt = require('bcrypt')
 const http = require('http');
 const express = require('express')
+const passport = require('passport');
+const { Strategy: GoogleStrategy } = require('passport-google-oauth20');
+const session = require('express-session');
+const dbConnect = require('./config/db.config.js');  // Update the path
+
 const app = express();
 app.use(cookie())
 
-const dbConnect = require('./config/db.config.js');
-const { timeStamp } = require("console");
+// Add session middleware BEFORE passport middleware
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    }
+}));
+
+// Passport middleware should come AFTER session middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "http://localhost:3000/auth/google/callback",
+    },
+    function (accessToken, refreshToken, profile, done) {
+      // Here you can save the user profile to your database
+      return done(null, profile);
+    }
+  )
+);
+
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
 
 dbConnect();
+
+
 
 //middleware
 app.use(express.urlencoded({extended:true}))
@@ -100,6 +141,42 @@ app.get('/logout',async (req,res)=>{
     // res.status(201).send("Logout Successfully")
 })
 
+// Route to initiate Google OAuth flow
+app.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+app.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/" }),
+  async (req, res) => {
+    try {
+      const email = req.user.emails[0].value;
+      const displayName = req.user.displayName;
+      const image = req.user.photos[0].value;
+      
+      let user = await userModel.findOne({ email });
+
+      if (!user) {
+        user = await userModel.create({
+          email,
+          displayName,
+          image
+        });
+      }
+      
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+      res.cookie("token", token); // Changed from "jwt" to "token" to match your other routes
+      res.redirect("/chat");
+    } catch (error) {
+      console.error("OAuth callback error:", error);
+      res.redirect("/login");
+    }
+  }
+);
+
+
 //chatPage
 app.get('/chat',isLoggedIn ,async (req, res) => {
     try {
@@ -133,7 +210,7 @@ app.get('/getChat/:id', isLoggedIn,async (req,res) => {
         {senderId:receiverId,receiverId:senderId}
         ]
     }).sort({timestamp:1})
-    console.log(allChats);
+    // console.log(allChats);
     //api se data bhejne k liye res.json ka istemaal krte hai
     res.json({allChats})
 })

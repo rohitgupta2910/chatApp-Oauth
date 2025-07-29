@@ -84,17 +84,38 @@
         >
           Create Account
         </button>
-
-        <p class="text-center text-gray-600 mt-4">
-          Already have an account?
-          <a
-            href="/login"
-            class="text-blue-500 hover:text-blue-600 font-medium transition duration-200"
-          >
-            Login here
-          </a>
-        </p>
       </form>
+
+      <div class="relative my-6">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-gray-300"></div>
+        </div>
+        <div class="relative flex justify-center text-sm">
+          <span class="px-2 bg-white text-gray-500">Or continue with</span>
+        </div>
+      </div>
+
+      <a
+        href="/auth/google"
+        class="w-full py-3 px-4 flex items-center justify-center bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200"
+      >
+        <img
+          src="https://www.google.com/favicon.ico"
+          alt="Google logo"
+          class="w-5 h-5 mr-2"
+        />
+        <span class="text-gray-700 font-medium">Continue with Google</span>
+      </a>
+
+      <p class="text-center text-gray-600 mt-6">
+        Already have an account?
+        <a
+          href="/login"
+          class="text-blue-500 hover:text-blue-600 font-medium transition duration-200"
+        >
+          Login here
+        </a>
+      </p>
     </div>
   </body>
 </html>
