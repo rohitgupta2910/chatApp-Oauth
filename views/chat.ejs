@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+
+  <body class="font-sans h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-4">
+    <div class="flex h-full max-w-7xl mx-auto backdrop-blur-xl bg-white/10 rounded-2xl shadow-2xl overflow-hidden border border-white/20">
+      <!-- Left Sidebar: Users List -->
+      <div class="w-1/3 border-r border-white/10 overflow-y-auto">
+        <div class="sticky top-0 backdrop-blur-xl bg-black/10 z-10 p-6 border-b border-white/10">
+          <div class="flex justify-between items-center">
+            <h2 class="text-2xl font-bold text-white">Online Users</h2>
+            <a
+              href="/logout"
+              class="px-4 py-2 bg-red-500/80 text-white rounded-xl hover:bg-red-600/80 transition-all duration-200"
+            >
+              Logout
+            </a>
+          </div>
+        </div>
+
+        <!-- User list with updated styling -->
+        <div class="p-4 space-y-2">
+          <% users.forEach(function(user) { %>
+          <div
+            onclick="updateReceiver('<%= user._id %>')"
+            class="p-4 rounded-xl hover:bg-white/10 cursor-pointer transition-all duration-200"
+          >
+            <p class="text-white/90 font-medium"><%= user.displayName %></p>
+          </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- Right Chat Section -->
+      <div class="w-2/3 flex flex-col bg-black/10">
+        <div class="p-6 border-b border-white/10">
+          <h2 class="text-2xl font-bold text-white">Chat Area</h2>
+        </div>
+
+        <!-- Chat Messages Area -->
+        <div
+          class="flex-1 p-6 overflow-y-auto flex flex-col gap-3"
+          id="messageContainer"
+        >
+          <p class="text-white/60 text-center">Select a user to start chatting</p>
+        </div>
+
+        <!-- Message Form -->
+        <form id="messageForm" class="p-4 backdrop-blur-xl bg-black/10 border-t border-white/10">
+          <div class="flex gap-2">
+            <input
+              type="text"
+              id="messageInput"
+              placeholder="Type your message..."
+              class="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-300"
+              required
+            />
+            <button
+              type="submit"
+              class="px-6 py-3 bg-gradient-to-r from-yellow-200 to-yellow-500 text-gray-900 rounded-xl hover:opacity-90 transition-all duration-300 font-medium"
+            >
+              Send
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+      // Correctly assign the server-side objects to JavaScript variables
+      // The EJS will render the JSON directly as a JavaScript object literal.
+      //isse koi error ni aayega , JSON.parse krogey toh error aayega
+      const users = <%- JSON.stringify(users) %>;
+      const currentUser = <%- JSON.stringify(currentUser) %>;
+
+      const currentUserId = currentUser._id;
+      let receiverId = users[0]?._id || null;
+
+      const socket = io();
+      socket.emit('join', currentUserId);
+
+      async function updateReceiver(selectedId) {
+        receiverId = selectedId;
+        console.log("Receiver Selected Id ---- >", receiverId);
+        
+        try {
+            // Fetch chats between current user and selected user
+            const response = await fetch(`/getChat/${selectedId}`);
+            const result = await response.json();
+            
+            if (result.allChats) {
+                showInitialChats(result.allChats, currentUserId);
+            }
+        } catch (error) {
+            console.error("Error fetching chats:", error);
+        }
+    }
+
+    // Separate function for initial chat load
+    function showInitialChats(chats, currentUserId) {
+        const chatBox = document.querySelector("#messageContainer");
+        chatBox.innerHTML = ""; // Clear previous messages
+        
+        chats.forEach((chat) => {
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add("p-2", "rounded-lg", "mb-2");
+            
+            // If current user is sender, show on right
+            if (chat.senderId === currentUserId) {
+                messageDiv.classList.add(
+                    "bg-blue-500",
+                    "text-white",
+                    "self-end"
+                );
+            } else {
+                messageDiv.classList.add(
+                    "bg-gray-200",
+                    "text-black",
+                    "self-start"
+                );
+            }
+            
+            messageDiv.textContent = chat.message;
+            chatBox.appendChild(messageDiv);
+        });
+        
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    socket.on("receive-message", async (data) => {
+        console.log("message received");
+        try {
+            const response = await fetch(`/getChat/${receiverId}`);
+            const result = await response.json();
+            
+            if (result.allChats) {
+                showInitialChats(result.allChats, currentUserId);
+            }
+        } catch (error) {
+            console.error("Error fetching updated chats:", error);
+        }
+    });
+
+      const form = document.getElementById("messageForm");
+      const input = document.getElementById("messageInput");
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const message = input.value.trim();
+        
+        if (message && receiverId) {
+            // Add message locally first
+            const messageDiv = document.createElement("div");
+            messageDiv.classList.add(
+                "p-2",
+                "rounded-lg",
+                "mb-2",
+                "bg-blue-500",
+                "text-white",
+                "self-end"
+            );
+            messageDiv.textContent = message;
+            document.querySelector("#messageContainer").appendChild(messageDiv);
+            
+            // Emit message to server
+            socket.emit("send-message", {
+                message: message,
+                receiverId: receiverId,
+                senderId: currentUserId,
+            });
+
+            input.value = "";
+            messageDiv.scrollIntoView({ behavior: "smooth" });
+        }
+      });
+    </script>
+  </body>
+</html>
