@@ -58,3 +58,30 @@ npm install
 
 # 4. Run the app
 npm start
+
+
+
+## 📁 .env sample
+PORT=5000
+MONGODB_URI=your-mongodb-connection-string
+JWT_SECRET=your-jwt-secret-key
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+
+## 📁 Google OAuth
+To enable Google Login:
+
+Go to Google Cloud Console
+
+1.Create a new Project
+2.Enable OAuth Consent Screen
+3.Add your App name, scopes, and user support email
+4.Create a new OAuth Client ID (choose Web Application)
+5.Add the redirect URI: http://localhost:5000/auth/google/callback
+6.Copy the Client ID and Client Secret
+7.Paste them into your .env file:
+
+
+## 🧑‍💻 Author
+Made with ❤️ by Rohit Gupta
